@@ -1,91 +1,115 @@
-import React from "react";
+import React, { useState } from "react";
 import ReactMarkdown from "react-markdown";
-import { FaRobot, FaUser } from "react-icons/fa";
+import { FaCopy, FaCheck } from "react-icons/fa";
+import "./Answers.css";
 
-const Answers = ({ data }) => {
+const Answers = ({ data, darkMode = true }) => {
+  const [copiedId, setCopiedId] = useState(null);
+
+  const copyToClipboard = (text, id) => {
+    const textToCopy = Array.isArray(text) ? text.join("\n") : text;
+    navigator.clipboard.writeText(textToCopy);
+    setCopiedId(id);
+    setTimeout(() => setCopiedId(null), 2000);
+  };
+
   if (!data?.length) {
-    return (
-      <p className="text-gray-400 text-center mt-10">
-        👋 What's on your mind today?
-      </p>
-    );
+    return null;
   }
 
   return (
-    <div className="space-y-4">
+    <div className={`messages-list ${darkMode ? "dark" : "light"}`}>
       {data.map((msg, index) => {
         const isUser = msg.sender === "user";
+        const uniqueId = `${index}-${msg.sender}`;
+
         return (
           <div
             key={index}
-            className={`flex items-start ${
-              isUser ? "justify-end" : "justify-start"
-            }`}
+            className={`message-wrapper ${isUser ? "user-message" : "ai-message"}`}
           >
-            {/* AI Icon */}
             {!isUser && (
-              <div className="flex-shrink-0 mr-2 mt-2 text-yellow-400">
-                <FaRobot size={18} title="AI" />
+              <div className="avatar ai-avatar">
+                <span>🤖</span>
               </div>
             )}
 
-            {/* Message Bubble */}
-            <div
-              className={`max-w-[85%] sm:max-w-[70%] px-3 sm:px-4 py-2 sm:py-3 text-sm sm:text-base leading-relaxed shadow-md
-                ${
-                  isUser
-                    ? "bg-blue-700 text-white rounded-2xl rounded-br-none"
-                    : "bg-zinc-700 text-white rounded-2xl rounded-bl-none"
-                }`}
-            >
-              <ReactMarkdown
-                components={{
-                  h1: ({ ...props }) => (
-                    <h1
-                      {...props}
-                      className="text-2xl font-bold text-blue-400 mb-2 text-left"
-                    />
-                  ),
-                  h2: ({ ...props }) => (
-                    <h2
-                      {...props}
-                      className="text-xl font-semibold text-blue-300 mb-2 text-left"
-                    />
-                  ),
-                  p: ({ ...props }) => (
-                    <p
-                      {...props}
-                      className="text-gray-200 m-0 p-0 text-left"
-                    />
-                  ),
-                  strong: ({ ...props }) => (
-                    <strong
-                      {...props}
-                      className="font-bold text-yellow-300"
-                    />
-                  ),
-                  ul: ({ ...props }) => (
-                    <ul
-                      {...props}
-                      className="list-disc ml-6 space-y-1 text-gray-200 text-left"
-                    />
-                  ),
-                  code: ({ ...props }) => (
-                    <code
-                      {...props}
-                      className="bg-zinc-800 text-green-400 px-1 rounded text-xs"
-                    />
-                  ),
-                }}
+            <div className="message-content">
+              <div
+                className={`message-bubble ${msg.isError ? "error" : ""
+                  }`}
               >
-                {Array.isArray(msg.text) ? msg.text.join("\n") : msg.text}
-              </ReactMarkdown>
+                <ReactMarkdown
+                  components={{
+                    h1: ({ ...props }) => (
+                      <h1 className="markdown-h1" {...props} />
+                    ),
+                    h2: ({ ...props }) => (
+                      <h2 className="markdown-h2" {...props} />
+                    ),
+                    h3: ({ ...props }) => (
+                      <h3 className="markdown-h3" {...props} />
+                    ),
+                    p: ({ ...props }) => (
+                      <p className="markdown-p" {...props} />
+                    ),
+                    strong: ({ ...props }) => (
+                      <strong className="markdown-strong" {...props} />
+                    ),
+                    em: ({ ...props }) => (
+                      <em className="markdown-em" {...props} />
+                    ),
+                    ul: ({ ...props }) => (
+                      <ul className="markdown-ul" {...props} />
+                    ),
+                    ol: ({ ...props }) => (
+                      <ol className="markdown-ol" {...props} />
+                    ),
+                    li: ({ ...props }) => (
+                      <li className="markdown-li" {...props} />
+                    ),
+                    code: ({ ...props }) => (
+                      <code className="markdown-code" {...props} />
+                    ),
+                    pre: ({ ...props }) => (
+                      <pre className="markdown-pre" {...props} />
+                    ),
+                    a: ({ ...props }) => (
+                      <a className="markdown-a" {...props} />
+                    ),
+                    blockquote: ({ ...props }) => (
+                      <blockquote className="markdown-blockquote" {...props} />
+                    ),
+                  }}
+                >
+                  {Array.isArray(msg.text) ? msg.text.join("\n") : msg.text}
+                </ReactMarkdown>
+              </div>
+
+              {!isUser && (
+                <button
+                  className="copy-btn"
+                  onClick={() => copyToClipboard(msg.text, uniqueId)}
+                  title="Copy message"
+                >
+                  {copiedId === uniqueId ? (
+                    <>
+                      <FaCheck size={13} />
+                      <span>Copied</span>
+                    </>
+                  ) : (
+                    <>
+                      <FaCopy size={13} />
+                      <span>Copy</span>
+                    </>
+                  )}
+                </button>
+              )}
             </div>
 
-            {/* User Icon */}
             {isUser && (
-              <div className="flex-shrink-0 ml-2 mt-2 text-blue-400">
-                <FaUser size={20} title="You" />
+              <div className="avatar user-avatar">
+                <span>👤</span>
               </div>
             )}
           </div>
@@ -96,4 +120,3 @@ const Answers = ({ data }) => {
 };
 
 export default Answers;
-
