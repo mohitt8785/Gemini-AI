@@ -23,13 +23,14 @@ const App = () => {
     setResult((prev) => [...prev, { sender: "user", text: question }]);
 
     try {
-      const response = await fetch(`${URL}?key=${API_KEY}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
-      });
+      const response =  await fetch(URL, {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "X-goog-api-key": API_KEY,
+  },
+  body: JSON.stringify(payload),
+});
 
       const ResponseData = await response.json();
       const FinalData =
